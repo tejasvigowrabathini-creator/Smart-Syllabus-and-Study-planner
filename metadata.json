@@ -1,0 +1,6 @@
+{
+  "name": "Smart Syllabus & Study Planner",
+  "description": "An AI-powered syllabus visualizer and structured weekly study planner using Gemini 1.5 Pro.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
