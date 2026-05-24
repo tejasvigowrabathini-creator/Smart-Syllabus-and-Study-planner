@@ -187,7 +187,7 @@ export default function App() {
   };
 
   // Submit syllabus to server API
-  const handleSubmitSyllabus = async () => {
+ const handleSubmitSyllabus = async () => {
     if (syllabusText.trim().length < 10) {
       setError("Please input or load a valid academic syllabus text of at least 10 characters.");
       return;
@@ -197,7 +197,7 @@ export default function App() {
     setError(null);
     setStudyPlan(null);
 
-  try {
+    try {
       // Simulate a 1.5-second processing delay so the user sees your loading spinner
       await new Promise(resolve => setTimeout(resolve, 1500));
       
@@ -208,16 +208,10 @@ export default function App() {
       setError(err.message || "An error occurred while assembling the schedule.");
       setIsLoading(false);
     }
-      // Clean up completed checklist lists
-    setIsLoading(false);
-    } catch (err: any) {
-      setError(err.message || "An error occurred while assembling the schedule.");
-      setIsLoading(false);
-    }
+
+    // Clean up completed checklist lists
     setCompletedModules([]);
   };
-
-  // Copy structured JSON payload
   const handleCopyJSON = async () => {
     if (!studyPlan) return;
     setCopyingJson(true);
