@@ -197,12 +197,25 @@ export default function App() {
     setError(null);
     setStudyPlan(null);
 
-    try {
-      // Simulate a 1.5-second processing delay so the user sees your loading spinner
+   try {
+      // 1. Simulate a 1.5-second processing delay so the user sees your loading spinner
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      // Directly load the local mock data instead of calling the broken server URL
-      setStudyPlan(mockStudyPlan);
+      // 2. Feed the nested properties directly into the state so studyPlan.modules exists perfectly
+      setStudyPlan({
+        success: true,
+        courseCode: mockStudyPlan.courseCode,
+        courseTitle: mockStudyPlan.courseTitle,
+        instructor: mockStudyPlan.instructor,
+        duration: mockStudyPlan.duration,
+        plan: mockStudyPlan.plan,
+        courseInfo: mockStudyPlan.courseInfo,
+        modules: mockStudyPlan.modules,
+        schedule: mockStudyPlan.schedule,
+        weeks: mockStudyPlan.weeks,
+        tasks: mockStudyPlan.tasks
+      });
+      
       setIsLoading(false);
     } catch (err: any) {
       setError(err.message || "An error occurred while assembling the schedule.");
