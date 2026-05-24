@@ -5,6 +5,7 @@ import {
   Award, BrainCircuit, ListCollapse, Timer, FileText, CheckCircle2,
   TrendingUp, User, GraduationCap, ChevronRight, HelpCircle, RefreshCw, BookmarkCheck
 } from "lucide-react";
+import { mockStudyPlan } from './mockData';
 import { motion, AnimatePresence } from "motion/react";
 import { SAMPLE_SYLLABUS } from "./sampleSyllabus";
 import { DifficultyLevel, StudyPlanResponse, StudyModule } from "./types";
