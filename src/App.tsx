@@ -197,31 +197,94 @@ export default function App() {
     setError(null);
     setStudyPlan(null);
 
-   try {
+  try {
       // 1. Simulate the loading spinner delay
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      // 2. Create a proxy object that intercepts ANY property call (.modules, .plan, etc.)
-      // and guarantees it returns a valid array or string instead of 'undefined'.
-      const bulletproofPlan = new Proxy({ ...mockStudyPlan }, {
-        get: (target: any, prop: string) => {
-          // If the UI looks for an array property, never let it be undefined
-          if (['modules', 'schedule', 'weeks', 'tasks', 'days', 'lessons'].includes(prop)) {
-            return target[prop] ?? [];
+      // 2. Build a data structure that completely satisfies every single nested path
+      const directMockData = {
+        success: true,
+        courseCode: "CS301",
+        courseTitle: "Advanced Data Structures & Algorithms",
+        instructor: "Dr. Elizabeth Vance",
+        duration: "8 Weeks",
+        length: 8,
+        
+        // This solves the 'cannot read properties of undefined (reading code)' error:
+        courseInfo: {
+          code: "CS301",
+          title: "Advanced Data Structures & Algorithms",
+          instructor: "Dr. Elizabeth Vance",
+          duration: "8 Weeks"
+        },
+        
+        modules: [
+          {
+            id: "mod-1",
+            title: "Week 1-2: Foundations & Linear Structures",
+            duration: "2 weeks",
+            focus: "Review Time/Space Complexity (Big O) and Master Arrays/Linked Lists.",
+            dailyGoal: "2 hours of conceptual review, 1 hour of practice problems.",
+            milestone: "Implement a doubly linked list from scratch.",
+            tasks: ["Review Big O Notation", "Implement Doubly Linked List", "Practice 3 Array Problems"]
+          },
+          {
+            id: "mod-2",
+            title: "Week 3-4: Trees & Hierarchical Data",
+            duration: "2 weeks",
+            focus: "Binary Trees, BSTs, and AVL Trees. Understanding balancing mechanisms.",
+            dailyGoal: "Practice tree traversals recursively and iteratively.",
+            milestone: "Solve 5 classic tree-based problems on LeetCode.",
+            tasks: ["Binary Tree Traversals", "AVL Tree Rotations", "Solve 5 LeetCode Tree Problems"]
+          },
+          {
+            id: "mod-3",
+            title: "Week 5-6: Graphs & Advanced Traversal",
+            duration: "2 weeks",
+            focus: "Graph representations (Adjacency Matrix/List) and BFS/DFS.",
+            dailyGoal: "Implement Dijkstra's Shortest Path algorithm.",
+            milestone: "Map out a real-world routing problem using graph concepts.",
+            tasks: ["Graph BFS/DFS Implementation", "Dijkstra's Algorithm", "Shortest Path Mini-Project"]
+          },
+          {
+            id: "mod-4",
+            title: "Week 7-8: Dynamic Programming & Final Review",
+            duration: "2 weeks",
+            focus: "Memoization vs. Tabulation techniques.",
+            dailyGoal: "Break down complex multi-stage decision problems.",
+            milestone: "Complete the comprehensive course mock exam.",
+            tasks: ["Memoization vs Tabulation", "Knapsack Problem Practice", "Final Course Mock Exam"]
           }
-          // If it looks for the nested .plan property, return a safe version of itself
-          if (prop === 'plan') {
-            return typeof target.plan === 'object' ? target.plan : target;
-          }
-          // Default fallback for lengths
-          if (prop === 'length') {
-            return target.length ?? target.modules?.length ?? 4;
-          }
-          return target[prop];
-        }
-      });
+        ],
+        schedule: [
+          { week: 1, topic: "Big O & Arrays" },
+          { week: 2, topic: "Linked Lists" },
+          { week: 3, topic: "Binary Search Trees" },
+          { week: 4, topic: "AVL Trees" },
+          { week: 5, topic: "Graph Traversals" },
+          { week: 6, topic: "Shortest Path" },
+          { week: 7, topic: "Dynamic Programming" },
+          { week: 8, topic: "Final Exam" }
+        ],
+        weeks: [{ title: "Week 1-2" }, { title: "Week 3-4" }, { title: "Week 5-6" }, { title: "Week 7-8" }],
+        tasks: ["Task 1", "Task 2", "Task 3", "Task 4"]
+      };
 
-      // 3. Update the state with our safe proxy object
+      // 3. Create a perfect mirror layer inside a '.plan' key for complete safety
+      const compositePayload = {
+        ...directMockData,
+        plan: {
+          ...directMockData
+        }
+      };
+
+      // 4. Update state directly
+      setStudyPlan(compositePayload);
+      setIsLoading(false);
+    } catch (err: any) {
+      setError(err.message || "An error occurred while assembling the schedule.");
+      setIsLoading(false);
+    }
       setStudyPlan(bulletproofPlan);
       setIsLoading(false);
     } catch (err: any) {
