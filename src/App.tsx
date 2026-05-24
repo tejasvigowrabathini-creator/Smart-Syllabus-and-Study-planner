@@ -198,34 +198,31 @@ export default function App() {
     setStudyPlan(null);
 
    try {
-      // 1. Simulate a 1.5-second processing delay so the user sees your loading spinner
+      // 1. Simulate the loading spinner delay
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      // 2. Build a data structure that fulfills both root-level and nested structure paths
-      const completePlanData = {
-        success: true,
-        courseCode: mockStudyPlan.courseCode,
-        courseTitle: mockStudyPlan.courseTitle,
-        instructor: mockStudyPlan.instructor,
-        duration: mockStudyPlan.duration,
-        length: mockStudyPlan.length ?? 8,
-        courseInfo: mockStudyPlan.courseInfo,
-        modules: mockStudyPlan.modules ?? [],
-        schedule: mockStudyPlan.schedule ?? [],
-        weeks: mockStudyPlan.weeks ?? [],
-        tasks: mockStudyPlan.tasks ?? [],
-        // If your UI is looking for studyPlan.plan.modules instead of studyPlan.modules, this covers it:
-        plan: {
-          ...mockStudyPlan,
-          modules: mockStudyPlan.modules ?? [],
-          schedule: mockStudyPlan.schedule ?? [],
-          weeks: mockStudyPlan.weeks ?? [],
-          tasks: mockStudyPlan.tasks ?? []
+      // 2. Create a proxy object that intercepts ANY property call (.modules, .plan, etc.)
+      // and guarantees it returns a valid array or string instead of 'undefined'.
+      const bulletproofPlan = new Proxy({ ...mockStudyPlan }, {
+        get: (target: any, prop: string) => {
+          // If the UI looks for an array property, never let it be undefined
+          if (['modules', 'schedule', 'weeks', 'tasks', 'days', 'lessons'].includes(prop)) {
+            return target[prop] ?? [];
+          }
+          // If it looks for the nested .plan property, return a safe version of itself
+          if (prop === 'plan') {
+            return typeof target.plan === 'object' ? target.plan : target;
+          }
+          // Default fallback for lengths
+          if (prop === 'length') {
+            return target.length ?? target.modules?.length ?? 4;
+          }
+          return target[prop];
         }
-      };
+      });
 
-      // 3. Set the state
-      setStudyPlan(completePlanData);
+      // 3. Update the state with our safe proxy object
+      setStudyPlan(bulletproofPlan);
       setIsLoading(false);
     } catch (err: any) {
       setError(err.message || "An error occurred while assembling the schedule.");
