@@ -301,6 +301,7 @@ export default function App() {
       setError(err.message || "An error occurred while assembling the schedule.");
       setIsLoading(false);
     }
+   };
 
    
     setCompletedModules([]);
