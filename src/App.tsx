@@ -209,13 +209,12 @@ export default function App() {
       setIsLoading(false);
     }
       // Clean up completed checklist lists
-      setCompletedModules([]);
+    setIsLoading(false);
     } catch (err: any) {
-      console.error(err);
-      setError(err.message || "Failed to parse syllabus. Please verify your internet connection or Gemini API Key configuration.");
-    } finally {
+      setError(err.message || "An error occurred while assembling the schedule.");
       setIsLoading(false);
     }
+    setCompletedModules([]);
   };
 
   // Copy structured JSON payload
