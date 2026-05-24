@@ -201,27 +201,36 @@ export default function App() {
       // 1. Simulate a 1.5-second processing delay so the user sees your loading spinner
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      // 2. Feed the nested properties directly into the state so studyPlan.modules exists perfectly
-      setStudyPlan({
+      // 2. Build a data structure that fulfills both root-level and nested structure paths
+      const completePlanData = {
         success: true,
         courseCode: mockStudyPlan.courseCode,
         courseTitle: mockStudyPlan.courseTitle,
         instructor: mockStudyPlan.instructor,
         duration: mockStudyPlan.duration,
-        plan: mockStudyPlan.plan,
+        length: mockStudyPlan.length ?? 8,
         courseInfo: mockStudyPlan.courseInfo,
-        modules: mockStudyPlan.modules,
-        schedule: mockStudyPlan.schedule,
-        weeks: mockStudyPlan.weeks,
-        tasks: mockStudyPlan.tasks
-      });
-      
+        modules: mockStudyPlan.modules ?? [],
+        schedule: mockStudyPlan.schedule ?? [],
+        weeks: mockStudyPlan.weeks ?? [],
+        tasks: mockStudyPlan.tasks ?? [],
+        // If your UI is looking for studyPlan.plan.modules instead of studyPlan.modules, this covers it:
+        plan: {
+          ...mockStudyPlan,
+          modules: mockStudyPlan.modules ?? [],
+          schedule: mockStudyPlan.schedule ?? [],
+          weeks: mockStudyPlan.weeks ?? [],
+          tasks: mockStudyPlan.tasks ?? []
+        }
+      };
+
+      // 3. Set the state
+      setStudyPlan(completePlanData);
       setIsLoading(false);
     } catch (err: any) {
       setError(err.message || "An error occurred while assembling the schedule.");
       setIsLoading(false);
     }
-
     // Clean up completed checklist lists
     setCompletedModules([]);
   };
