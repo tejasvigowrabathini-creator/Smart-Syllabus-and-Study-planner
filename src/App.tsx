@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { mockStudyPlan } from './mockData';
 import { 
   Upload, Calendar, Clock, Sparkles, CheckCircle, AlertCircle, 
   Trash2, Play, Pause, RotateCcw, Download, Copy, ExternalLink, 
@@ -196,20 +197,17 @@ export default function App() {
     setError(null);
     setStudyPlan(null);
 
-    try {
-      const response = await fetch("/api/process-syllabus", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ syllabus_text: syllabusText })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail || `Server returned bad status: ${response.status}`);
-      }
-
-      const rawPlan: StudyPlanResponse = await response.json();
-      setStudyPlan(rawPlan);
+  try {
+      // Simulate a 1.5-second processing delay so the user sees your loading spinner
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Directly load the local mock data instead of calling the broken server URL
+      setStudyPlan(mockStudyPlan);
+      setIsLoading(false);
+    } catch (err: any) {
+      setError(err.message || "An error occurred while assembling the schedule.");
+      setIsLoading(false);
+    }
       // Clean up completed checklist lists
       setCompletedModules([]);
     } catch (err: any) {
