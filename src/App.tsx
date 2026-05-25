@@ -187,13 +187,17 @@ export default function App() {
   };
 
   // Submit syllabus to server API
- const handleSubmitSyllabus = async () => {
+const handleSubmitSyllabus = async () => {
     if (syllabusText.trim().length < 10) {
       setError("Please input or load a valid academic syllabus text of at least 10 characters.");
       return;
     }
 
-   try {
+    setIsLoading(true);
+    setError(null);
+    setStudyPlan(null);
+
+    try {
       // 1. Simulate the loading spinner delay
       await new Promise(resolve => setTimeout(resolve, 1500));
       
@@ -293,6 +297,18 @@ export default function App() {
         plan: { ...directMockData },
         generation: { ...directMockData }
       };
+
+      // 4. Update the state engine cleanly
+      setStudyPlan(compositePayload);
+      setIsLoading(false);
+    } catch (err: any) {
+      setError(err.message || "An error occurred while assembling the schedule.");
+      setIsLoading(false);
+    }
+
+    // Clean up completed checklist lists
+    setCompletedModules([]);
+  };
 
       // 4. Update the state engine cleanly
       setStudyPlan(compositePayload);
