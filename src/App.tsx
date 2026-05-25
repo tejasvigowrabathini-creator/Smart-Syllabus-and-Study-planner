@@ -3,12 +3,8 @@ import {
   BookOpen, 
   Calendar, 
   CheckCircle, 
-  Clock, 
   AlertCircle, 
   Sparkles, 
-  Download, 
-  Clipboard, 
-  ChevronRight, 
   BarChart2, 
   User, 
   FileText 
@@ -93,7 +89,7 @@ export default function App() {
         milestone: `Checkpoint ${index + 1} finalized`
       }));
 
-      // Assemble final payload matching the interface layout structure perfectly
+      // New data structure matches UI fields perfectly
       const dynamicPayload = {
         success: true,
         courseCode: inferredCode,
@@ -220,7 +216,4 @@ REQUIRED EXPECTATIONS:
         <div className="lg:col-span-2">
           {!studyPlan ? (
             <div className="bg-white rounded-2xl p-12 text-center border-2 border-dashed border-slate-200 flex flex-col items-center justify-center h-full min-h-[400px]">
-              <div className="p-4 rounded-full bg-indigo-50 text-indigo-600 mb-4 animate-bounce">
-                <BookOpen className="h-8 w-8" />
-              </div>
-              <h3 className="text-base font-bold text-slate-800">No Active Study
+              <div className="p-4 rounded-full bg-indigo-50 text-indigo-600 mb-4
