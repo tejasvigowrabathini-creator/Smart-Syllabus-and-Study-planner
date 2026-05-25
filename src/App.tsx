@@ -35,93 +35,90 @@ export default function App() {
       // Simulate loading delay for UI smoothness
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      const directMockData = {
+      // Dynamic Processing Engine: Parse input lines to generate custom plans
+      const cleanText = syllabusText.trim();
+      const lines = cleanText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+      
+      // 1. Determine a Dynamic Title
+      let inferredTitle = "Custom Study Sequence";
+      let inferredCode = "PLAN-101";
+      let inferredInstructor = "Self-Paced Guide";
+      
+      for (const line of lines) {
+        if (line.toLowerCase().includes('course') || line.toLowerCase().includes('syllabus') || line.toLowerCase().includes('subject')) {
+          inferredTitle = line.replace(/(course|syllabus|subject|:|--)/gi, '').trim();
+          break;
+        }
+      }
+      if (inferredTitle.length > 50) inferredTitle = inferredTitle.substring(0, 47) + "...";
+      
+      // 2. Extract Key phrases or milestones from lines to build custom modules
+      const topicLines = lines.filter(l => 
+        l.length > 15 && 
+        !l.toLowerCase().includes('syllabus') && 
+        !l.toLowerCase().includes('instructor')
+      ).slice(0, 4); // Capture up to 4 distinct key subjects
+
+      // Fallback topics if the text is short or uniform
+      const fallbackTopics = [
+        "Phase 1: Core Fundamentals & Concept Discovery",
+        "Phase 2: Intermediate Deep Dive & System Application",
+        "Phase 3: Advanced Optimization & Framework Integration",
+        "Phase 4: Comprehensive Milestone Testing & Review"
+      ];
+
+      // Build out dynamic modules based on user's exact text input
+      const generatedModules = Array.from({ length: 4 }).map((_, index) => {
+        const userLine = topicLines[index];
+        const title = userLine ? userLine : fallbackTopics[index];
+        const phaseNum = index + 1;
+        
+        return {
+          id: `dynamic-mod-${phaseNum}`,
+          title: title.startsWith('Phase') || title.startsWith('Week') ? title : `Phase ${phaseNum}: ${title}`,
+          duration: "1-2 Weeks",
+          focus: `Targeted analysis and performance evaluation regarding: "${cleanText.substring(0, 60)}..."`,
+          dailyGoal: `Review core materials for 45 mins; complete 1 implementation task.`,
+          milestone: `Pass sub-section review checkpoint ${phaseNum}.`,
+          tasks: [`Core Reading Assignment`, `Practical Lab Activity`, `Self-Assessment Check`],
+          difficulty: index > 2 ? "Hard" : "Medium",
+          estimated_hours: 4 + (index * 2)
+        };
+      });
+
+      // Build out dynamic timeline increments
+      const generatedTimeline = generatedModules.map((mod, index) => ({
+        week_number: index + 1,
+        topic: mod.title.replace(/Phase \d+:\s*/g, ''),
+        milestone: `Checkpoint ${index + 1} finalized`
+      }));
+
+      // Assemble final payload matching the interface layout structure perfectly
+      const dynamicPayload = {
         success: true,
-        courseCode: "CS301",
-        courseTitle: "Advanced Data Structures & Algorithms",
-        instructor: "Dr. Elizabeth Vance",
-        duration: "8 Weeks",
-        length: 8,
+        courseCode: inferredCode,
+        courseTitle: inferredTitle,
+        instructor: inferredInstructor,
+        duration: `${generatedModules.length} Progression Blocks`,
+        length: generatedModules.length,
         courseInfo: {
-          code: "CS301",
-          title: "Advanced Data Structures & Algorithms",
-          instructor: "Dr. Elizabeth Vance",
-          duration: "8 Weeks",
-          course_code: "CS301",
-          course_name: "Advanced Data Structures & Algorithms",
-          overall_weeks: 8
+          code: inferredCode,
+          title: inferredTitle,
+          instructor: inferredInstructor,
+          duration: `${generatedModules.length} Progression Blocks`,
+          course_code: inferredCode,
+          course_name: inferredTitle,
+          overall_weeks: generatedModules.length
         },
-        modules: [
-          {
-            id: "mod-1",
-            title: "Week 1-2: Foundations & Linear Structures",
-            duration: "2 weeks",
-            focus: "Review Time/Space Complexity (Big O) and Master Arrays/Linked Lists.",
-            dailyGoal: "2 hours of conceptual review, 1 hour of practice problems.",
-            milestone: "Implement a doubly linked list from scratch.",
-            tasks: ["Review Big O Notation", "Implement Doubly Linked List", "Practice 3 Array Problems"],
-            difficulty: "Easy",
-            estimated_hours: 6,
-            topics: ["Big O Notation", "Arrays", "Linked Lists"],
-            learning_outcomes: ["Analyze time complexity", "Build dynamic lists"]
-          },
-          {
-            id: "mod-2",
-            title: "Week 3-4: Trees & Hierarchical Data",
-            duration: "2 weeks",
-            focus: "Binary Trees, BSTs, and AVL Trees. Understanding balancing mechanisms.",
-            dailyGoal: "Practice tree traversals recursively and iteratively.",
-            milestone: "Solve 5 classic tree-based problems on LeetCode.",
-            tasks: ["Binary Tree Traversals", "AVL Tree Rotations", "Solve 5 LeetCode Tree Problems"],
-            difficulty: "Medium",
-            estimated_hours: 8,
-            topics: ["Binary Trees", "BST", "AVL Trees"],
-            learning_outcomes: ["Implement tree traversals", "Balance search trees"]
-          },
-          {
-            id: "mod-3",
-            title: "Week 5-6: Graphs & Advanced Traversal",
-            duration: "2 weeks",
-            focus: "Graph representations (Adjacency Matrix/List) and BFS/DFS.",
-            dailyGoal: "Implement Dijkstra's Shortest Path algorithm.",
-            milestone: "Map out a real-world routing problem using graph concepts.",
-            tasks: ["Graph BFS/DFS Implementation", "Dijkstra's Algorithm", "Shortest Path Mini-Project"],
-            difficulty: "Hard",
-            estimated_hours: 10,
-            topics: ["Graphs", "BFS & DFS", "Shortest Path"],
-            learning_outcomes: ["Traverse complex graphs", "Find optimized routes"]
-          },
-          {
-            id: "mod-4",
-            title: "Week 7-8: Dynamic Programming & Final Review",
-            duration: "2 weeks",
-            focus: "Memoization vs. Tabulation techniques.",
-            dailyGoal: "Break down complex multi-stage decision problems.",
-            milestone: "Complete the comprehensive course mock exam.",
-            tasks: ["Memoization vs Tabulation", "Knapsack Problem Practice", "Final Course Mock Exam"],
-            difficulty: "Hard",
-            estimated_hours: 12,
-            topics: ["Dynamic Programming", "Memoization", "Algorithms"],
-            learning_outcomes: ["Optimize recursive solutions", "Pass final benchmarks"]
-          }
-        ],
-        timeline: [
-          { week_number: 1, topic: "Big O & Arrays", estimated_weekly_hours: 3, milestone: "Complexity benchmarks checked" },
-          { week_number: 2, topic: "Linked Lists", estimated_weekly_hours: 3, milestone: "Linear memory references completed" },
-          { week_number: 3, topic: "Binary Search Trees", estimated_weekly_hours: 4, milestone: "Hierarchical layouts built" },
-          { week_number: 4, topic: "AVL Trees & Balancing", estimated_weekly_hours: 4, milestone: "Rotations implemented" },
-          { week_number: 5, topic: "Graph Traversals (BFS/DFS)", estimated_weekly_hours: 5, milestone: "Matrix maps connected" },
-          { week_number: 6, topic: "Shortest Path Algorithms", estimated_weekly_hours: 5, milestone: "Dijkstra metrics passing" },
-          { week_number: 7, topic: "Dynamic Programming Foundations", estimated_weekly_hours: 6, milestone: "Memoization logic sound" },
-          { week_number: 8, topic: "Comprehensive Review & Final Exam", estimated_weekly_hours: 6, milestone: "Full mock exam passed" }
-        ],
-        generation_notes: "This plan was successfully processed locally using pre-cached academic alignment profiles."
+        modules: generatedModules,
+        timeline: generatedTimeline,
+        generation_notes: "Plan successfully parsed dynamically from user input text streams."
       };
 
       const compositePayload = {
-        ...directMockData,
-        plan: { ...directMockData },
-        generation: { ...directMockData }
+        ...dynamicPayload,
+        plan: { ...dynamicPayload },
+        generation: { ...dynamicPayload }
       };
 
       setStudyPlan(compositePayload);
@@ -226,133 +223,4 @@ REQUIRED EXPECTATIONS:
               <div className="p-4 rounded-full bg-indigo-50 text-indigo-600 mb-4 animate-bounce">
                 <BookOpen className="h-8 w-8" />
               </div>
-              <h3 className="text-base font-bold text-slate-800">No Active Study Plan loaded</h3>
-              <p className="text-xs text-slate-400 max-w-sm mt-1 font-medium">
-                Paste an academic syllabus on the left and submit to view an interactive breakdown.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-6 animate-fade-in">
-              {/* Course Identity Header Card */}
-              <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 mb-2 border border-indigo-100">
-                    {studyPlan.courseInfo?.code || "COURSE"}
-                  </span>
-                  <h2 className="text-xl font-black text-slate-900 leading-tight">
-                    {studyPlan.courseInfo?.title || "Academic Action Plan"}
-                  </h2>
-                  <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500 font-semibold">
-                    <span className="flex items-center space-x-1">
-                      <User className="h-3.5 w-3.5 text-slate-400" />
-                      <span>{studyPlan.courseInfo?.instructor}</span>
-                    </span>
-                    <span className="flex items-center space-x-1">
-                      <Calendar className="h-3.5 w-3.5 text-slate-400" />
-                      <span>{studyPlan.courseInfo?.duration} Total Sequence</span>
-                    </span>
-                  </div>
-                </div>
-
-                <div className="bg-slate-50 rounded-xl p-4 border border-slate-100 flex items-center space-x-4 self-start md:self-auto">
-                  <div className="p-3 bg-emerald-50 text-emerald-600 rounded-lg">
-                    <BarChart2 className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <div className="text-xs text-slate-400 font-bold uppercase tracking-wider">Progress Metrics</div>
-                    <div className="text-lg font-black text-slate-800">
-                      {completedModules.length} / {studyPlan.modules?.length || 0} Done
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Study Modules Track List */}
-              <div className="space-y-4">
-                <h3 className="text-base font-black text-slate-900 tracking-tight pl-1">Iterative Milestones</h3>
-                
-                {(studyPlan.modules || []).map((mod: any) => {
-                  const isDone = completedModules.includes(mod.id);
-                  return (
-                    <div 
-                      key={mod.id} 
-                      className={`bg-white rounded-2xl border transition-all duration-200 overflow-hidden shadow-sm ${
-                        isDone ? 'border-emerald-200 bg-emerald-50/20 opacity-85' : 'border-slate-100 hover:border-slate-200'
-                      }`}
-                    >
-                      <div className="p-6">
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="space-y-1">
-                            <h4 className={`text-base font-bold transition-all ${isDone ? 'text-slate-500 line-through' : 'text-slate-900'}`}>
-                              {mod.title}
-                            </h4>
-                            <p className="text-xs text-slate-500 font-medium leading-relaxed max-w-2xl">
-                              {mod.focus}
-                            </p>
-                          </div>
-                          
-                          <button
-                            onClick={() => toggleModuleCompleted(mod.id)}
-                            className={`p-2 rounded-xl border transition-all flex items-center space-x-1.5 font-bold text-xs ${
-                              isDone 
-                                ? 'bg-emerald-600 border-emerald-600 text-white shadow-sm shadow-emerald-100' 
-                                : 'bg-white border-slate-200 text-slate-500 hover:text-indigo-600 hover:border-indigo-200'
-                            }`}
-                          >
-                            <CheckCircle className="h-4 w-4" />
-                            <span className="hidden sm:inline">{isDone ? 'Completed' : 'Mark Done'}</span>
-                          </button>
-                        </div>
-
-                        <div className="mt-4 pt-4 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-semibold text-slate-600">
-                          <div className="bg-slate-50 rounded-xl p-3 border border-slate-100/50">
-                            <span className="text-slate-400 block text-[10px] uppercase font-bold tracking-wider mb-0.5">Daily Commitment</span>
-                            <span className="text-slate-700">{mod.dailyGoal}</span>
-                          </div>
-                          <div className="bg-indigo-50/30 rounded-xl p-3 border border-indigo-100/30">
-                            <span className="text-indigo-400 block text-[10px] uppercase font-bold tracking-wider mb-0.5">Target Milestone</span>
-                            <span className="text-indigo-900 font-bold">{mod.milestone}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Weekly Chronological Mapping Row */}
-              {studyPlan.timeline && (
-                <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-                  <h3 className="text-base font-black text-slate-900 mb-4 flex items-center space-x-2">
-                    <Calendar className="h-5 w-5 text-purple-600" />
-                    <span>Chronological Timeline Sequence</span>
-                  </h3>
-                  <div className="overflow-x-auto rounded-xl border border-slate-100">
-                    <table className="w-full text-left border-collapse text-xs font-medium">
-                      <thead>
-                        <tr className="bg-slate-50 border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider text-[10px]">
-                          <th className="p-3">Week</th>
-                          <th className="p-3">Core Target Area</th>
-                          <th className="p-3">Deliverable Benchmark Target</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-50 text-slate-700">
-                        {studyPlan.timeline.map((row: any, idx: number) => (
-                          <tr key={idx} className="hover:bg-slate-50/50 transition-all font-semibold">
-                            <td className="p-3 text-indigo-600 font-bold">W{row.week_number}</td>
-                            <td className="p-3 font-bold text-slate-800">{row.topic}</td>
-                            <td className="p-3 text-slate-500 font-medium">{row.milestone}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      </main>
-    </div>
-  );
-}
+              <h3 className="text-base font-bold text-slate-800">No Active Study
