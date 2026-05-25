@@ -58,71 +58,23 @@ export default function App() {
     setCompletedModules([]);
 
     try {
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
+      const response = await fetch("/api/generate-plan", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 1000,
-          system: `You are a study plan generator. Given a syllabus, return ONLY valid JSON with no markdown, no backticks, no explanation. The JSON must follow this exact structure:
-{
-  "courseInfo": {
-    "code": "string",
-    "title": "string",
-    "instructor": "string",
-    "duration": "string"
-  },
-  "modules": [
-    {
-      "id": "mod-1",
-      "title": "string",
-      "duration": "string",
-      "focus": "string",
-      "dailyGoal": "string",
-      "milestone": "string",
-      "tasks": ["string", "string", "string"],
-      "difficulty": "Easy|Medium|Hard",
-      "estimated_hours": 6
-    }
-  ],
-  "timeline": [
-    {
-      "week_number": 1,
-      "topic": "string",
-      "milestone": "string"
-    }
-  ]
-}
-Generate 4 modules and matching timeline rows. Base everything on the actual syllabus content provided.`,
-          messages: [
-            {
-              role: "user",
-              content: `Generate a study plan for this syllabus:\n\n${syllabusText}`
-            }
-          ]
-        })
+        body: JSON.stringify({ syllabus: syllabusText }),
       });
 
       if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || `Server error: ${response.status}`);
       }
 
-      const data = await response.json();
-      const rawText = data.content?.[0]?.text ?? "";
-
-      let parsed: StudyPlan;
-      try {
-        parsed = JSON.parse(rawText);
-      } catch {
-        const match = rawText.match(/\{[\s\S]*\}/);
-        if (!match) throw new Error("Could not parse response from AI.");
-        parsed = JSON.parse(match[0]);
-      }
+      const parsed: StudyPlan = await response.json();
 
       if (!parsed.modules || !Array.isArray(parsed.modules)) {
-        throw new Error("Invalid plan structure received.");
+        throw new Error("Invalid plan structure received from server.");
       }
 
       setStudyPlan(parsed);
